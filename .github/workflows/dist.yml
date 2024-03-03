@@ -18,10 +18,8 @@ jobs:
         run: npm run build
       - name: Publish on dist branch
         run: |
-          mv dist ..
-          rm -rf *
+          mv .git dist && cd dist
           git checkout dist/${{ github.ref_name }} || git checkout --orphan dist/${{ github.ref_name }}
-          mv ../dist/* .
           git add .
           git commit -m "Builded ${{ github.ref_name }}"
           git push origin dist/${{ github.ref_name }}
