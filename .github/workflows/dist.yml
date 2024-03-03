@@ -1,20 +1,27 @@
-name: Publish saint1729 Personal Site
+name: Build dist branch
 
-on:
-  - push
+on: [push]
+
+permissions:
+  contents: write
 
 jobs:
-  build:
+  build-dist:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: fregante/setup-git-user@v2
       - uses: actions/setup-node@v4
-      - run: npm install
-      - run: npm run build-only
-      - run: |
-          git branch --orphan dist/{GITHUB_REF}
-          git checkout dist/{GITHUB_REF}
-          git add -f dist
-          git commit -m "Builded {GITHUB_REF}"
-          git push origin dist/{GITHUB_REF}
-      
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Publish on dist branch
+        run: |
+          mv dist ..
+          rm -rf *
+          git checkout dist/${{ github.ref_name }} || git checkout --orphan dist/${{ github.ref_name }}
+          mv ../dist/* .
+          git add .
+          git commit -m "Builded ${{ github.ref_name }}"
+          git push origin dist/${{ github.ref_name }}

@@ -28,7 +28,8 @@ const cardSlots = computed(() => {
         <v-skeleton-loader class="mx-auto border" type="paragraph"></v-skeleton-loader>
       </v-card-text>
     </slot>
-    <template v-for="(_, slotName) in cardSlots" v-slot:[slotName]="slotProps">
+    <template v-for="(_, slotName) in cardSlots" v-slot:[slotName]="slotProps// @ts-ignore
+    ">
       <slot :name="slotName" v-bind="slotProps || {}"></slot>
     </template>
   </v-card>
