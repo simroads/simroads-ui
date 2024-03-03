@@ -1,0 +1,12 @@
+{
+  "in_same_place": "In the same place",
+  "not_found": "Not found",
+  "route_not_found": "Route not found",
+  "route_info": "Route info",
+  "search": "Search places...",
+  "undefined_overlay": "Undefined overlay",
+  "add_pin_route": "Add pin to route",
+  "remove_pin_route": "Remove pin from route",
+  "click_pin_add": "Click on map to add a pin to route",
+  "click_pin_remove": "Click on a pin to remove it from route"
+}
