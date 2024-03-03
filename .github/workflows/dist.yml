@@ -5,6 +5,9 @@ on: [push]
 permissions:
   contents: write
 
+env:
+  VITE_BASE_URL: /CHANGE_ME_BASE_URL/
+
 jobs:
   build-dist:
     runs-on: ubuntu-latest
