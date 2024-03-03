@@ -28,7 +28,7 @@ const getLocaleName = (locale: Locale) => {
           </v-list-item-action>
         </template>
 
-        <v-list-item-title>Colored roads</v-list-item-title>
+        <v-list-item-title>{{ $t('colored_roads') }}</v-list-item-title>
       </v-list-item>
     </v-list>
 
@@ -36,7 +36,7 @@ const getLocaleName = (locale: Locale) => {
       <v-select
         prepend-icon="mdi-translate"
         variant="outlined"
-        label="Language"
+        :label="$t('language')"
         v-model="$i18n.locale"
         :items="
           $i18n.availableLocales.sort((a, b) => getLocaleName(a).localeCompare(getLocaleName(b)))

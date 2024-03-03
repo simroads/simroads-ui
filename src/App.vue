@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { defineAsyncComponent } from 'vue';
 import MapView from './components/MapView.vue';
-import SettingsDrawer from './components/SettingsDrawer.vue';
+const SettingsDrawer = defineAsyncComponent(() => import('@/components/SettingsDrawer.vue'))
+
 </script>
 
 <template>

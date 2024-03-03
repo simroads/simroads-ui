@@ -1,7 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import OverlayCard from '@/components/cards/OverlayCard.vue'
-import RouteCard from '@/components/cards/RouteCard.vue'
-import { watch, watchEffect } from 'vue'
+import { watch } from 'vue'
 import { useMap } from 'vue-maplibre-gl'
 
 declare module 'vue-router' {
@@ -23,7 +21,7 @@ const router = createRouter({
       name: 'overlay',
       props: true,
       components: {
-        controlInfo: OverlayCard
+        controlInfo: () => import('@/components/cards/OverlayCard.vue')
       }
     },
     {
@@ -31,7 +29,7 @@ const router = createRouter({
       name: 'route',
       props: true,
       components: {
-        controlInfo: RouteCard
+        controlInfo: () => import('@/components/cards/RouteCard.vue')
       }
     }
   ]

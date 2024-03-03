@@ -4,16 +4,16 @@ import { ref, type UnwrapRef, type WatchSource, watch, type ComputedRef } from '
 
 const w = new ExpWorker()
 
-export function asyncExp<K extends keyof Export>(path: K): Promise<Export[K]> {
+export function asyncExp<K extends keyof Export>(path: K ,save = true): Promise<Export[K]> {
   return new Promise<Export[K]>((resolve) => {
     const ev = (e: any) => {
-      if (e.data[0] === path) {
+      if (e.data[0].path === path) {
         w.removeEventListener('message', ev)
         resolve(e.data[1] as UnwrapRef<Export[K] | undefined>)
       }
     }
     w.addEventListener('message', ev)
-    w.postMessage(path)
+    w.postMessage({path, save})
   })
 }
 

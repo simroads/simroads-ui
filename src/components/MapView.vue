@@ -1,10 +1,9 @@
 <script setup lang="ts" async>
-import { Popup } from 'maplibre-gl'
-import MapControls from './MapControls.vue'
 import { useMapStore } from '@/stores/map'
-import { computed } from 'vue'
+import { computed, defineAsyncComponent } from 'vue'
 import type { MglEvent } from 'vue-maplibre-gl'
 import { useRouter } from 'vue-router'
+const MapControls = defineAsyncComponent(() => import('@/components/MapControls.vue'))
 
 const mapStore = useMapStore()
 const router = useRouter()

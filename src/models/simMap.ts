@@ -61,36 +61,6 @@ function translateGeoJSON(
       coordinates: coords
     }
   }
-  if (geoJSON.type === 'MultiPoint') {
-    const coords = geoJSON.coordinates.map((coord) => func(coord[0], coord[1]))
-    return {
-      ...geoJSON,
-      coordinates: coords
-    }
-  }
-  if (geoJSON.type === 'MultiLineString') {
-    const coords = geoJSON.coordinates.map((line) => line.map((coord) => func(coord[0], coord[1])))
-    return {
-      ...geoJSON,
-      coordinates: coords
-    }
-  }
-  if (geoJSON.type === 'MultiPolygon') {
-    const coords = geoJSON.coordinates.map((poly) =>
-      poly.map((ring) => ring.map((coord) => func(coord[0], coord[1])))
-    )
-    return {
-      ...geoJSON,
-      coordinates: coords
-    }
-  }
-  if (geoJSON.type === 'GeometryCollection') {
-    const geometries = geoJSON.geometries.map((geometry) => translateGeoJSON(geometry, func))
-    return {
-      ...geoJSON,
-      geometries: geometries
-    }
-  }
   return geoJSON
 }
 

@@ -8,5 +8,7 @@
   "add_pin_route": "Add pin to route",
   "remove_pin_route": "Remove pin from route",
   "click_pin_add": "Click on map to add a pin to route",
-  "click_pin_remove": "Click on a pin to remove it from route"
+  "click_pin_remove": "Click on a pin to remove it from route",
+  "colored_roads": "Colored roads",
+  "language": "Language"
 }

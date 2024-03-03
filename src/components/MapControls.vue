@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useUiStore } from '@/stores/ui'
-import SearchControl from './SearchControl.vue'
-import RouteControl from './RouteControl.vue'
-import CardControl from './CardControl.vue'
+import SearchControl from '@/components/controls/SearchControl.vue'
+import RouteControl from '@/components/controls/RouteControl.vue'
+import CardControl from '@/components/controls/CardControl.vue'
 
 const uiStore = useUiStore()
 </script>
@@ -10,8 +10,8 @@ const uiStore = useUiStore()
 <template>
   <SearchControl></SearchControl>
   <CardControl></CardControl>
-  <RouteControl></RouteControl>
   <mgl-navigation-control position="top-right" showCompass></mgl-navigation-control>
+  <RouteControl></RouteControl>
   <mgl-custom-control position="bottom-right" noClasses>
     <v-btn icon="mdi-information" density="compact" class="bottom-right-ctrl" target="_blank" href="https://github.com/SimRoads"></v-btn>
   </mgl-custom-control>

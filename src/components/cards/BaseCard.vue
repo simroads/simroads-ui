@@ -14,15 +14,21 @@ const cardSlots = computed(() => {
 
 <template>
   <v-card elevation="0" v-bind="$attrs" class="card">
-    <template v-slot:append >
-      <v-btn icon="mdi-close" class="close-button" variant="text" :to="{ name: 'home' }" size="small"/>
+    <template v-slot:append>
+      <v-btn
+        icon="mdi-close"
+        class="close-button"
+        variant="text"
+        :to="{ name: 'home' }"
+        size="small"
+      />
     </template>
     <slot>
       <v-card-text>
         <v-skeleton-loader class="mx-auto border" type="paragraph"></v-skeleton-loader>
       </v-card-text>
     </slot>
-    <template v-for="(_, slotName) in cardSlots" v-slot:[slotName.toString()]="slotProps">
+    <template v-for="(_, slotName) in cardSlots" v-slot:[slotName]="slotProps">
       <slot :name="slotName" v-bind="slotProps || {}"></slot>
     </template>
   </v-card>

@@ -1,0 +1,20 @@
+name: Publish saint1729 Personal Site
+
+on:
+  - push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v4
+      - run: npm install
+      - run: npm run build-only
+      - run: |
+          git branch --orphan dist/{GITHUB_REF}
+          git checkout dist/{GITHUB_REF}
+          git add -f dist
+          git commit -m "Builded {GITHUB_REF}"
+          git push origin dist/{GITHUB_REF}
+      

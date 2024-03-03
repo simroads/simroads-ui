@@ -44,14 +44,15 @@ const imgUrl = computed(() =>
 const extractGoodZoomFromLayer = (layer: LayerSpecification) => {
   let zoom = layer.minzoom || 0
   if (layer.paint) {
-    for (const l in layer.paint) {
+    const paintProps = layer.paint as any
+    for (const l in paintProps) {
       if (l.endsWith('opacity')) {
         if (
-          Array.isArray(layer.paint[l]) &&
-          layer.paint[l][0] == 'interpolate' &&
-          layer.paint[l][2][0] == 'zoom'
+          Array.isArray(paintProps[l]) &&
+          paintProps[l][0] == 'interpolate' &&
+          paintProps[l][2][0] == 'zoom'
         ) {
-          zoom = Math.max(zoom, layer.paint[l][layer.paint[l].length - 2])
+          zoom = Math.max(zoom, paintProps[l][paintProps[l].length - 2])
         }
       }
     }

@@ -1,7 +1,7 @@
-import { nextTick } from 'vue'
+import { nextTick, watch } from 'vue'
 import { createI18n, type I18n } from 'vue-i18n'
 import router from './router'
-import { getExp } from '@/models/exp'
+import { asyncExp } from '@/utils/exp'
 
 export async function loadLocaleMessages(i18n: I18n, locale: string) {
   localStorage.setItem('language', locale)
@@ -14,8 +14,8 @@ export async function loadLocaleMessages(i18n: I18n, locale: string) {
         return {}
       }
     })(),
-    getExp(`translations/locales/${locale}`),
-    getExp(`translations/keys`)
+    asyncExp(`translations/locales/${locale}`),
+    asyncExp(`translations/keys`)
   ])
 
   const messages = {
@@ -27,30 +27,38 @@ export async function loadLocaleMessages(i18n: I18n, locale: string) {
   return nextTick()
 }
 
-const locales = (await getExp(`translations/keys`)).locales
-let currentLocale = 'en_us'
-for (const loc in [
-  router.currentRoute.value.query.locale?.toString(),
-  localStorage.getItem('language'),
-  navigator.language
-]) {
-  const gameLocale = loc?.replace(/-/, '_').toLowerCase()
-  if (Object.keys(locales).includes(gameLocale)) {
-    currentLocale = gameLocale
-    break
-  }
-}
 
 const instance = createI18n({
-  locale: currentLocale,
+  locale: 'en_us',
   fallbackLocale: 'en_us',
-  messages: Object.fromEntries(
-    Object.keys(locales).map((key) => [key, { lang_name: locales[key] }])
-  ),
+  messages: {},
   legacy: false,
   globalInjection: true
 })
-loadLocaleMessages(instance, instance.global.locale.value)
+async function initLoad() {
+  const locales = (await asyncExp(`translations/keys`)).locales
+  let currentLocale = 'en_us'
+  for (const loc in [
+    router.currentRoute.value.query.locale?.toString(),
+    localStorage.getItem('language'),
+    navigator.language
+  ]) {
+    const gameLocale = loc?.replace(/-/, '_').toLowerCase()
+    if (Object.keys(locales).includes(gameLocale)) {
+      currentLocale = gameLocale
+      break
+    }
+  }
+  Object.keys(locales).forEach((key) => instance.global.setLocaleMessage(key, { lang_name: locales[key] }))
+  instance.global.locale.value = currentLocale
+
+  loadLocaleMessages(instance, instance.global.locale.value)
+}
+initLoad()
+
+watch(instance.global.locale, (locale) => {
+  loadLocaleMessages(instance, locale)
+})
 
 router.beforeEach(async (to, from, next) => {
   const paramsLocale = (to.query.locale as string)?.replace(/-/, '_').toLowerCase()

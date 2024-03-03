@@ -1,4 +1,4 @@
-import { getExp } from '@/models/exp'
+import { getExp } from './exp'
 import { SimRBush, type Link, type Node, type Route } from '@/models/route'
 import axios from 'axios'
 import localforage from 'localforage'
@@ -13,35 +13,42 @@ const lf = localforage.createInstance({
   name: 'exp' + axios.defaults.baseURL
 })
 
-let nodeTree = new SimRBush().fromJSON(await lf.getItem('comp/routing/nodeTree'))
-let nodes = (await lf.getItem<{ [id: string]: Node }>('comp/routing/nodes')) || {}
-let links = (await lf.getItem<{ [id: string]: Link[] }>('comp/routing/links')) || {}
+let nodeTree: SimRBush
+let nodes: { [id: string]: Node }
+let links: { [id: string]: Link[] }
 
-if (Object.keys(nodes).length == 0 || Object.keys(links).length == 0) {
-  const [nn, ll] = await Promise.all([
-    await getExp('routing/nodes', false),
-    await getExp('routing/links', false)
-  ])
-  nodes = Object.fromEntries(nn.map((n: any) => [n[0], { id: n[0], x: n[1], z: n[2] }]))
-  links = ll.reduce((acc: any, link: any) => {
-    if (!acc[link[1]]) acc[link[1]] = []
-    acc[link[1]].push({
-      type: link[0],
-      start: nodes[link[1]],
-      end: nodes[link[2]],
-      length: link[3],
-      roadSize: link[4],
-      roadId: link[5],
-      mapIds: link[0] == 'prefab' ? link[6] : [link[5]]
-    })
-    return acc
-  }, {})
-  await lf.setItem(`comp/routing/links`, links)
-  await lf.setItem(`comp/routing/nodes`, nodes)
+const load = async () => {
+  nodeTree = new SimRBush().fromJSON(await lf.getItem('comp/routing/nodeTree'))
+  nodes = (await lf.getItem<{ [id: string]: Node }>('comp/routing/nodes')) || {}
+  links = (await lf.getItem<{ [id: string]: Link[] }>('comp/routing/links')) || {}
 
-  nodeTree = new SimRBush()
-  nodeTree.load(Object.values(nodes))
-  await lf.setItem('comp/routing/nodeTree', nodeTree.toJSON())
+  if (Object.keys(nodes).length == 0 || Object.keys(links).length == 0) {
+    const [nn, ll] = await Promise.all([
+      await getExp('routing/nodes', false),
+      await getExp('routing/links', false)
+    ])
+    nodes = Object.fromEntries(nn.map((n: any) => [n[0], { id: n[0], x: n[1], z: n[2] }]))
+    links = ll.reduce((acc: any, link: any) => {
+      if (!acc[link[1]]) acc[link[1]] = []
+      acc[link[1]].push({
+        type: link[0],
+        start: nodes[link[1]],
+        end: nodes[link[2]],
+        length: link[3],
+        roadSize: link[4],
+        roadId: link[5],
+        mapIds: link[0] == 'prefab' ? link[6] : [link[5]]
+      })
+      return acc
+    }, {})
+    await lf.setItem(`comp/routing/links`, links)
+    await lf.setItem(`comp/routing/nodes`, nodes)
+
+    nodeTree = new SimRBush()
+    nodeTree.load(Object.values(nodes))
+    await lf.setItem('comp/routing/nodeTree', nodeTree.toJSON())
+    postMessage('ready')
+  }
 }
 
 async function internalRoute(startId: string, endId: string): Promise<Route> {
@@ -126,4 +133,4 @@ onmessage = async function (e) {
     })
 }
 
-postMessage('ready')
+load()

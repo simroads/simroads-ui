@@ -14,7 +14,7 @@ import router from './router'
 // Types
 import type { App } from 'vue'
 
-export async function registerPlugins(app: App) {
+export function registerPlugins(app: App) {
   app.use(pinia)
   app.use(vuetify)
   app.use(maplibre)
