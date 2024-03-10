@@ -1,0 +1,80 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Create GHP dists
+
+# Controls when the workflow will run
+on:
+  workflow_call:
+    inputs:
+      export_run_id:
+        type: number
+        required: false
+        default: 0
+      ui_run_id:
+        type: number
+        required: false
+        default: 0
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all exports
+        uses: dawidd6/action-download-artifact@v3
+        if: github.event.inputs.export_run_id != 0
+        with:
+          name: all_games_export
+          github_token: ${{ secrets.GH_PAT }}
+          repo: simroads/simroads-exporter
+          run_id: ${{github.event.inputs.export_run_id}}
+
+      - name: Download all exports
+        uses: dawidd6/action-download-artifact@v3
+        if: github.event.inputs.export_run_id == 0
+        with:
+          name: all_games_export
+          github_token: ${{ secrets.GH_PAT }}
+          repo: simroads/simroads-exporter
+          search_artifacts: true
+          branch: main
+
+      - name: Download UI
+        uses: dawidd6/action-download-artifact@v3
+        if: github.event.inputs.ui_run_id != 0
+        with:
+          name: dist
+          github_token: ${{ secrets.GH_PAT }}
+          repo: simroads/simroads-ui
+          run_id: ${{github.event.inputs.ui_run_id}}
+          path: dist
+
+      - name: Download UI
+        uses: dawidd6/action-download-artifact@v3
+        if: github.event.inputs.ui_run_id == 0
+        with:
+          name: dist
+          github_token: ${{ secrets.GH_PAT }}
+          repo: simroads/simroads-ui
+          search_artifacts: true
+          branch: main
+          path: dist
+
+      - name: Puzzle it
+        shell: python
+        run: |
+          import os
+          import json
+          map_ids = [e['map_id'] for e in json.load(open('config.json', 'r'))]
+          for map_id in map_ids:
+            path = os.path.join('gh_pages', map_id)
+            os.makedirs(path.join('exp'), exist_ok=True)
+            os.system(f'unzip {map_id}_export.zip -d {os.path.join(path, 'exp')}')
+            os.system(f'cp dist/* {os.path.join(path)}')
+            os.system(f'find {os.path.join(path)} \( -type d -name .git -prune \) -o -type f -print0 | xargs -0 sed -i 's/\/CHANGE_ME_BASE_URL\//\/{map_id}\//g')
+
+      - name: Upload GHP dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: ghp_dist
+          path: gh_pages
