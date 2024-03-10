@@ -7,13 +7,11 @@ on:
   workflow_call:
     inputs:
       export_run_id:
-        type: number
+        type: string
         required: false
-        default: 0
       ui_run_id:
-        type: number
+        type: string
         required: false
-        default: 0
       prepend_path:
         type: string
         required: false
@@ -21,40 +19,45 @@ on:
 jobs:
   pack:
     runs-on: ubuntu-latest
-
+    continue-on-error: true
     steps:
       - name: Download all exports
         uses: dawidd6/action-download-artifact@v3
-        if: github.event.inputs.export_run_id != 0
+        if: inputs.export_run_id
         with:
           name: all_games_export
           github_token: ${{ secrets.GH_PAT }}
           repo: simroads/simroads-exporter
-          run_id: ${{github.event.inputs.export_run_id}}
+          run_id: ${{inputs.export_run_id}}
+          workflow_search: true
+          workflow_conclusion: ""
 
       - name: Download all exports
         uses: dawidd6/action-download-artifact@v3
-        if: github.event.inputs.export_run_id == 0
+        if: ${{!inputs.export_run_id}}
         with:
           name: all_games_export
           github_token: ${{ secrets.GH_PAT }}
           repo: simroads/simroads-exporter
           search_artifacts: true
+          workflow_search: true
           branch: main
 
       - name: Download UI
         uses: dawidd6/action-download-artifact@v3
-        if: github.event.inputs.ui_run_id != 0
+        if: inputs.ui_run_id
         with:
           name: dist
           github_token: ${{ secrets.GH_PAT }}
           repo: simroads/simroads-ui
-          run_id: ${{github.event.inputs.ui_run_id}}
+          run_id: ${{inputs.ui_run_id}}
           path: dist
+          workflow_search: true
+          workflow_conclusion: ""
 
       - name: Download UI
         uses: dawidd6/action-download-artifact@v3
-        if: github.event.inputs.ui_run_id == 0
+        if: ${{!inputs.ui_run_id}}
         with:
           name: dist
           github_token: ${{ secrets.GH_PAT }}
@@ -62,24 +65,69 @@ jobs:
           search_artifacts: true
           branch: main
           path: dist
+          workflow_search: true
 
       - name: Puzzle it
         shell: python
         env:
-          prepend: ${{github.event.inputs.prepend_path}}
+          prepend: ${{inputs.prepend_path}}
         run: |
           import os
           import json
           map_ids = [e['map_id'] for e in json.load(open('config.json', 'r'))]
           for map_id in map_ids:
             path = os.path.join('gh_pages', os.getenv('prepend'), map_id)
-            os.makedirs(path.join('exp'), exist_ok=True)
-            os.system(f'unzip {map_id}_export.zip -d {os.path.join(path, 'exp')}')
-            os.system(f'cp dist/* {os.path.join(path)}')
-            os.system(f'find {os.path.join(path)} \( -type d -name .git -prune \) -o -type f -print0 | xargs -0 sed -i 's/\/CHANGE_ME_BASE_URL\//\/{map_id}\//g')
+            os.makedirs(os.path.join(path, 'exp'), exist_ok=True)
+            os.system(f'unzip {map_id}_export.zip -d {os.path.join(path, "exp")}')
+            os.system(f'cp -r dist/* {path}')
+            os.system(f"find {path} \( -type d -name .git -prune \) -o -type f -print0 | xargs -0 sed -i 's/\/CHANGE_ME_BASE_URL\//\/{map_id}\//g'")
 
       - name: Upload GHP dist
         uses: actions/upload-artifact@v4
         with:
           name: ghp_dist
           path: gh_pages
+  
+  publish_main:
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    needs: pack
+    continue-on-error: true
+    steps:
+      - uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: upload_subdist.yml
+          repo: 'simroads/simroads.github.io'
+          token: ${{ secrets.GH_PAT }}
+          inputs: |
+            { 
+              "repo":
+                "${{github.repository}}",
+              "run_id": 
+                "${{github.run_id}}"
+            } 
+
+  publish_pr:
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'
+    needs: pack
+    continue-on-error: true
+    steps:        
+      - name: Download latest GH Pages
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          name: gh-pages
+          path: gh_pages
+        
+      - uses: actions/download-artifact@v4
+        with:
+          name: ghp_dist
+          path: gh_pages
+      
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: gh_pages
+
+      - uses: actions/deploy-pages@v4
+                
