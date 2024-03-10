@@ -14,6 +14,9 @@ on:
         type: number
         required: false
         default: 0
+      prepend_path:
+        type: string
+        required: false
 
 jobs:
   pack:
@@ -62,12 +65,14 @@ jobs:
 
       - name: Puzzle it
         shell: python
+        env:
+          prepend: ${{github.event.inputs.prepend_path}}
         run: |
           import os
           import json
           map_ids = [e['map_id'] for e in json.load(open('config.json', 'r'))]
           for map_id in map_ids:
-            path = os.path.join('gh_pages', map_id)
+            path = os.path.join('gh_pages', os.getenv('prepend'), map_id)
             os.makedirs(path.join('exp'), exist_ok=True)
             os.system(f'unzip {map_id}_export.zip -d {os.path.join(path, 'exp')}')
             os.system(f'cp dist/* {os.path.join(path)}')
