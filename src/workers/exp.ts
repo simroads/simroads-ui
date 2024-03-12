@@ -2,7 +2,7 @@ import { type Export } from '@/models/exp'
 import lz4 from 'lz4js'
 import { decode } from '@msgpack/msgpack'
 import localforage from 'localforage'
-import axios from 'axios'
+import axios from '@/utils/axios'
 import type { SimMap } from '@/models/simMap'
 
 const lf = localforage.createInstance({

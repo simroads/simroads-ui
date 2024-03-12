@@ -1,6 +1,6 @@
 import { getExp } from './exp'
 import { SimRBush, type Link, type Node, type Route } from '@/models/route'
-import axios from 'axios'
+import axios from '@/utils/axios'
 import localforage from 'localforage'
 import knn from 'rbush-knn'
 import tinyqueue from 'tinyqueue'
