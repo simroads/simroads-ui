@@ -71,6 +71,7 @@ jobs:
         shell: python
         env:
           prepend: ${{inputs.prepend_path}}
+          repo: ${{github.ref != 'refs/heads/main' && github.event.repository.name || ''}}
         run: |
           import os
           import json
@@ -80,7 +81,8 @@ jobs:
             os.makedirs(os.path.join(path, 'exp'), exist_ok=True)
             os.system(f'unzip {map_id}_export.zip -d {os.path.join(path, "exp")}')
             os.system(f'cp -r dist/* {path}')
-            os.system(f"find {path} \( -type d -name .git -prune \) -o -type f -print0 | xargs -0 sed -i 's/\/CHANGE_ME_BASE_URL\//\/{map_id}\//g'")
+            web_path = os.path.join(os.getenv('repo'), os.getenv('prepend'), map_id).replace('/', '\/')
+            os.system(f"find {path} \( -type d -name .git -prune \) -o -type f -print0 | xargs -0 sed -i 's/\/CHANGE_ME_BASE_URL\//\/{web_path}\//g'")
 
       - name: Upload GHP dist
         uses: actions/upload-artifact@v4
