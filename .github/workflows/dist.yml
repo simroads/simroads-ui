@@ -35,3 +35,10 @@ jobs:
           git add .
           git commit -m "Builded ${{ github.ref_name }}"
           git push origin dist/${{ github.ref_name }} -f
+
+  create_ghp_dist:
+    needs: build-dist
+    uses: simroads/simroads-ui/.github/workflows/ghp_dists.yml@main
+    with:
+      ui_run_id: ${{ github.run_id }}
+    secrets: inherit

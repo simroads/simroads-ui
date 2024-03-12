@@ -70,18 +70,20 @@ jobs:
       - name: Puzzle it
         shell: python
         env:
-          prepend: ${{inputs.prepend_path}}
-          repo: ${{github.ref != 'refs/heads/main' && github.event.repository.name || ''}}
+          prepend: ${{ inputs.prepend_path || '' }}
+          repo: ${{ github.ref != 'refs/heads/main' && github.event.repository.name || '' }}
+          prepend_ref: ${{ github.ref != 'refs/heads/main' && github.ref || '' }}
         run: |
           import os
           import json
           map_ids = [e['map_id'] for e in json.load(open('config.json', 'r'))]
           for map_id in map_ids:
-            path = os.path.join('gh_pages', os.getenv('prepend'), map_id)
+            relative_path = os.path.join(os.getenv('prepend_ref'), os.getenv('prepend'), map_id)
+            path = os.path.join('gh_pages', relative_path)
             os.makedirs(os.path.join(path, 'exp'), exist_ok=True)
             os.system(f'unzip {map_id}_export.zip -d {os.path.join(path, "exp")}')
             os.system(f'cp -r dist/* {path}')
-            web_path = os.path.join(os.getenv('repo'), os.getenv('prepend'), map_id).replace('/', '\/')
+            web_path = os.path.join(os.getenv('repo'), relative_path).replace('/', '\/')
             os.system(f"find {path} \( -type d -name .git -prune \) -o -type f -print0 | xargs -0 sed -i 's/\/CHANGE_ME_BASE_URL\//\/{web_path}\//g'")
 
       - name: Upload GHP dist
