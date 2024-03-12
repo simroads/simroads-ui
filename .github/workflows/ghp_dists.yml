@@ -116,8 +116,13 @@ jobs:
       - name: Download latest GH Pages
         uses: dawidd6/action-download-artifact@v3
         with:
+          workflow_search: true
+          if_no_artifact_found: ignore
+          search_artifacts: true
           name: gh-pages
           path: gh_pages
+
+      - run: mkdir -p gh_pages
         
       - uses: actions/download-artifact@v4
         with:
