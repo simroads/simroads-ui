@@ -1,0 +1,1 @@
+import{aV as i}from"./index-iVPC1WgH.js";const s=r=>typeof r!="string"&&(r!=null&&r.localeKey)&&i.te(r.localeKey)?i.t(r.localeKey):typeof r!="string"&&(r==null?void 0:r.defaultValue)||typeof r=="string"&&r||void 0;export{s as t};
